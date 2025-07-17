@@ -9,4 +9,6 @@ public interface ISwipeService {
     void swipe(Long userId, SwipeRequest swipeRequest)throws Exception;
 
     SwipeResponse getMySwipes(Long userId) throws Exception;
+
+    void deleteAllSwipeByUserId(Long id);
 }
