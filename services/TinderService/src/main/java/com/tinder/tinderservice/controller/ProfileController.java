@@ -3,8 +3,11 @@ package com.tinder.tinderservice.controller;
 import com.tinder.tinderservice.dto.CreateProfileRequest;
 import com.tinder.tinderservice.dto.ProfileResponse;
 import com.tinder.tinderservice.dto.UpdateProfileRequest;
+import com.tinder.tinderservice.exception.ErrorResponse;
 import com.tinder.tinderservice.service.IProfileService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
@@ -28,10 +31,10 @@ public class ProfileController {
             description = "Creates a new user profile based on the provided information"
     )
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Profile created successfully"),
-            @ApiResponse(responseCode = "404", description = "Profile not found"),
-            @ApiResponse(responseCode = "400", description = "Invalid input data"),
-            @ApiResponse(responseCode = "500", description = "Internal server error")
+            @ApiResponse(responseCode = "200", description = "Profile created successfully", content = @Content(schema = @Schema(implementation = ProfileResponse.class))),
+            @ApiResponse(responseCode = "404", description = "Profile not found", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid input data", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     public ResponseEntity<ProfileResponse> createProfile(@io.swagger.v3.oas.annotations.parameters.RequestBody(
             description = "Profile request body",
@@ -46,10 +49,10 @@ public class ProfileController {
             description = "Update existing user profile based on the provided information"
     )
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Profile updated successfully"),
-            @ApiResponse(responseCode = "404", description = "Profile not found"),
-            @ApiResponse(responseCode = "400", description = "Invalid input data"),
-            @ApiResponse(responseCode = "500", description = "Internal server error")
+            @ApiResponse(responseCode = "200", description = "Profile updated successfully", content = @Content(schema = @Schema(implementation = ProfileResponse.class))),
+            @ApiResponse(responseCode = "404", description = "Profile not found", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid input data", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     public ResponseEntity<ProfileResponse> editProfile(@io.swagger.v3.oas.annotations.parameters.RequestBody(
             description = "Profile request body",
@@ -65,10 +68,10 @@ public class ProfileController {
             description = "Deletes a user profile based on the provided user ID"
     )
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Profile deleted successfully"),
-            @ApiResponse(responseCode = "400", description = "Invalid user ID provided"),
-            @ApiResponse(responseCode = "404", description = "Profile not found"),
-            @ApiResponse(responseCode = "500", description = "Internal server error")
+            @ApiResponse(responseCode = "200", description = "Profile deleted successfully",content = @Content(schema = @Schema(implementation = String.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid user ID provided", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = "Profile not found", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     public ResponseEntity<String> deleteProfile(@PathVariable("id") Long id) throws Exception {
         profileService.deleteProfile(id);
@@ -81,10 +84,10 @@ public class ProfileController {
             description = "Retrieves the user profile details for the given user ID"
     )
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Profile retrieved successfully"),
-            @ApiResponse(responseCode = "400", description = "Invalid user ID"),
-            @ApiResponse(responseCode = "404", description = "Profile not found"),
-            @ApiResponse(responseCode = "500", description = "Internal server error")
+            @ApiResponse(responseCode = "200", description = "Profile retrieved successfully",content = @Content(schema = @Schema(implementation = ProfileResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid user ID", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = "Profile not found", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     public ResponseEntity<ProfileResponse> getProfile(@PathVariable("id") Long id) throws Exception {
         ProfileResponse response = this.profileService.getUserProfileBYId(id);

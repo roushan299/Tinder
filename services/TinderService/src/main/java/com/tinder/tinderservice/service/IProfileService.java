@@ -13,4 +13,6 @@ public interface IProfileService {
     void deleteProfile(Long id) throws Exception;
 
     ProfileResponse getUserProfileBYId(Long id)throws Exception;
+
+    boolean isProfileExistsById(Long id);
 }

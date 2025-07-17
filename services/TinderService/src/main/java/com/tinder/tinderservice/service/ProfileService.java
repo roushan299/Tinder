@@ -75,9 +75,11 @@ public class ProfileService implements IProfileService {
 
     }
 
-    private boolean isProfileExistsById(Long id) {
+    @Override
+    public boolean isProfileExistsById(Long id) {
         return userRepository.findById(id).isPresent();
     }
+
 
     @Transactional
     protected ProfileResponse createOrUpdateProfile(User userProfile) throws Exception {
