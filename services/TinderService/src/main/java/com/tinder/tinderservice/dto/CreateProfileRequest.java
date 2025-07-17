@@ -2,6 +2,7 @@ package com.tinder.tinderservice.dto;
 
 import com.tinder.tinderservice.enums.GENDER;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.*;
@@ -14,6 +15,7 @@ import lombok.*;
 public class CreateProfileRequest {
 
     @NotNull(message = "Name is required")
+    @NotBlank(message = "Name is required")
     private String name;
 
     @Positive(message = "Age should be greater than 0")
