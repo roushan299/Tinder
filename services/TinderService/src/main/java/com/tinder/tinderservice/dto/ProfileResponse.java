@@ -1,27 +1,23 @@
-package com.tinder.tinderservice.entity;
+package com.tinder.tinderservice.dto;
 
+import com.tinder.tinderservice.entity.User;
 import com.tinder.tinderservice.enums.GENDER;
-import jakarta.persistence.*;
 import lombok.*;
-
 
 @Getter
 @Setter
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
-@Table(name = "user")
-public class User extends BaseEntity {
+@Builder
+public class ProfileResponse {
 
+    private Long id;
     private String name;
     private Integer age;
     private GENDER gender;
     private GENDER sexualPreference;
     private String job;
     private String bio;
+    private AddressResponse address;
 
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "address_id")
-    private Address address;
 }
