@@ -9,6 +9,7 @@ import com.tinder.tinderservice.exception.ProfileDoesntExits;
 import com.tinder.tinderservice.mapper.MatchMapper;
 import com.tinder.tinderservice.repository.MatchRepository;
 import com.tinder.tinderservice.util.ProfileUtil;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -38,7 +39,7 @@ public class MatchService implements IMatchService {
             throw new ProfileDoesntExits("User profile not found for ID: " + userId);
         }
 
-        List<Match> matches = matchRepository.findByUserOneIdOrUserTwoId(userId, userId);
+        List<Match> matches = findMatchesByUserId(userId);
 
         if (matches.isEmpty()) {
             log.info("No matches found for userId: {}", userId);
@@ -84,7 +85,25 @@ public class MatchService implements IMatchService {
     }
 
     @Override
-    public void deleteAllMatchByUserId(Long id) {
-        //TODO
+    @Transactional
+    public void deleteAllMatchByUserId(Long userId) {
+        log.info("Initiating deletion of matches for user ID: {}", userId);
+
+        List<Match> matches = findMatchesByUserId(userId);
+
+        if (matches.isEmpty()) {
+            log.info("No matches found for user ID: {}", userId);
+            return;
+        }
+
+        log.debug("Found {} matches to delete for user ID: {}", matches.size(), userId);
+
+        matchRepository.deleteAll(matches);
+
+        log.info("Deleted {} matches for user ID: {}", matches.size(), userId);
+    }
+
+    protected List<Match> findMatchesByUserId(Long userId) {
+        return matchRepository.findByUserOneIdOrUserTwoId(userId, userId);
     }
 }

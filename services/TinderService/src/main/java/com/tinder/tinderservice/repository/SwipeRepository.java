@@ -12,4 +12,7 @@ public interface SwipeRepository extends JpaRepository<Swipe, Long> {
     List<Swipe> findBySwiperId(Long userId);
 
     List<Swipe> findBySwiperIdAndSwipeTypeIn(Long swiperId, List<SWIPE_TYPE> swipeTypes);
+
+    List<Swipe> findBySwiperIdOrSwipeeId(Long swiperId, Long swipeeId);
+
 }

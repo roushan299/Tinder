@@ -9,6 +9,7 @@ import com.tinder.tinderservice.exception.ProfileDoesntExits;
 import com.tinder.tinderservice.mapper.SwipeMapper;
 import com.tinder.tinderservice.repository.SwipeRepository;
 import com.tinder.tinderservice.util.ProfileUtil;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -69,9 +70,28 @@ public class SwipeService implements ISwipeService {
     }
 
     @Override
-    public void deleteAllSwipeByUserId(Long id) {
-        //TODO
+    @Transactional
+    public void deleteAllSwipeByUserId(Long userId) {
+        log.info("Initiating deletion of swipes for user ID: {}", userId);
+
+        List<Swipe> swipesToDelete = findSwipesByUserId(userId);
+
+        if (swipesToDelete.isEmpty()) {
+            log.info("No swipes found for user ID: {}", userId);
+            return;
+        }
+
+        log.debug("Found {} swipes to delete for user ID: {}", swipesToDelete.size(), userId);
+
+        swipeRepository.deleteAll(swipesToDelete);
+
+        log.info("Deleted {} swipe records for user ID: {}", swipesToDelete.size(), userId);
     }
+
+    protected List<Swipe> findSwipesByUserId(Long userId) {
+        return swipeRepository.findBySwiperIdOrSwipeeId(userId, userId);
+    }
+
 
 
     private void validateProfilesExist(Long userId, Long swipeeId) {
