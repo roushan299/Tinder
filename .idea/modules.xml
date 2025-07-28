@@ -3,7 +3,6 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/DeckService.iml" filepath="$PROJECT_DIR$/.idea/modules/DeckService.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/DeckService.main.iml" filepath="$PROJECT_DIR$/.idea/modules/DeckService.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/Tinder.iml" filepath="$PROJECT_DIR$/.idea/Tinder.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/TinderService.iml" filepath="$PROJECT_DIR$/.idea/modules/TinderService.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/TinderService.main.iml" filepath="$PROJECT_DIR$/.idea/modules/TinderService.main.iml" />

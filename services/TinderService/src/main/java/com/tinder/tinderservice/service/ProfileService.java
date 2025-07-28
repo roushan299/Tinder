@@ -3,6 +3,7 @@ package com.tinder.tinderservice.service;
 import com.tinder.tinderservice.dto.CreateProfileRequest;
 import com.tinder.tinderservice.dto.ProfileResponse;
 import com.tinder.tinderservice.dto.UpdateProfileRequest;
+import com.tinder.tinderservice.dto.UserDTO;
 import com.tinder.tinderservice.entity.Address;
 import com.tinder.tinderservice.entity.Geolocation;
 import com.tinder.tinderservice.entity.User;
@@ -10,6 +11,7 @@ import com.tinder.tinderservice.exception.MatchCleanupException;
 import com.tinder.tinderservice.exception.ProfileDoesntExits;
 import com.tinder.tinderservice.exception.SwipeDeletionException;
 import com.tinder.tinderservice.mapper.ProfileMapper;
+import com.tinder.tinderservice.messageservice.UserKafkaProducer;
 import com.tinder.tinderservice.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
@@ -24,13 +26,15 @@ public class ProfileService implements IProfileService {
     private final IGeolocationService geolocationService;
     private final ISwipeService swipeService;
     private final IMatchService matchService;
+    private final UserKafkaProducer userKafkaProducer;
 
-    public ProfileService(UserRepository userRepository, IAddressService addressService, IGeolocationService geolocationService, ISwipeService swipeService, IMatchService matchService) {
+    public ProfileService(UserRepository userRepository, IAddressService addressService, IGeolocationService geolocationService, ISwipeService swipeService, IMatchService matchService, UserKafkaProducer userKafkaProducer) {
         this.userRepository = userRepository;
         this.addressService = addressService;
         this.geolocationService = geolocationService;
         this.swipeService = swipeService;
         this.matchService = matchService;
+        this.userKafkaProducer = userKafkaProducer;
     }
 
     @Override
@@ -104,7 +108,10 @@ public class ProfileService implements IProfileService {
 
         userProfile.setAddress(address);
         log.debug("Persisting user: {}", userProfile);
-        userRepository.save(userProfile);
+        User user = userRepository.save(userProfile);
+
+        UserDTO userDTO = ProfileMapper.getUserDTO(user);
+        this.userKafkaProducer.sendUser(userDTO);
 
         ProfileResponse response = ProfileMapper.getProfileResponse(userProfile);
         log.info("Profile saved successfully for user ID: {}", response.getId());

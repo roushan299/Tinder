@@ -124,5 +124,21 @@ public class ProfileMapper {
     }
 
 
+    public static UserDTO getUserDTO(User user) {
+        GeolocationResponse geolocationResponse = GeolocationMapper.getGeolocationResponse(user.getAddress().getGeoLocation());
+        AddressResponse addressResponse = AddressMapper.getAddressResponse(user.getAddress(), geolocationResponse);
+        addressResponse.setGeolocation(geolocationResponse);
 
+        UserDTO userDTO = UserDTO.builder()
+                .id(user.getId())
+                .name(user.getName())
+                .age(user.getAge())
+                .gender(user.getGender())
+                .sexualPreference(user.getSexualPreference())
+                .job(user.getJob())
+                .bio(user.getBio())
+                .address(addressResponse)
+                .build();
+        return userDTO;
+    }
 }
