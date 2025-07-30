@@ -2,6 +2,7 @@ package com.tinder.deckservice.exception;
 
 
 import lombok.*;
+import org.springframework.http.HttpStatus;
 
 import java.time.LocalDateTime;
 
@@ -11,11 +12,11 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 public class ErrorResponse {
-    private int status;
+    private HttpStatus status;
     private String message;
     private LocalDateTime timestamp;
 
-    public ErrorResponse(int status, String message) {
+    public ErrorResponse(HttpStatus status, String message) {
         this.status = status;
         this.message = message;
         this.timestamp = LocalDateTime.now();

@@ -1,11 +1,13 @@
 package com.tinder.deckservice.service;
 
 import com.tinder.deckservice.dto.AddressResponse;
+import com.tinder.deckservice.dto.DeckUserDTO;
 import com.tinder.deckservice.dto.GeolocationResponse;
 import com.tinder.deckservice.dto.UserDTO;
 import com.tinder.deckservice.entity.Address;
 import com.tinder.deckservice.entity.Geolocation;
 import com.tinder.deckservice.entity.User;
+import com.tinder.deckservice.mapper.DeckUserMapper;
 import com.tinder.deckservice.mapper.UserMapper;
 import com.tinder.deckservice.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -44,6 +46,19 @@ public class UserService implements IUserService {
             log.error("❌ Failed to save user: {}", userDTO, e);
             throw e;
         }
+    }
+
+    @Override
+    public boolean exitsUserById(Long userId) {
+        boolean flag = this.userRepository.existsById(userId);
+        return flag;
+    }
+
+    @Override
+    public DeckUserDTO getUserById(long potentialMatch) {
+        User user =  this.userRepository.findById(potentialMatch).get();
+        DeckUserDTO dto = DeckUserMapper.getDeckUserDTO(user);
+        return dto;
     }
 
     private Address persistAddress(UserDTO userDTO) {
