@@ -8,7 +8,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class DeckServiceApplication {
 
 	public static void main(String[] args) {
-		//initializeEnvironmentVariables();
+		initializeEnvironmentVariables();
 		SpringApplication.run(DeckServiceApplication.class, args);
 	}
 	

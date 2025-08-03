@@ -3,6 +3,7 @@
   <component name="AdditionalModuleElements">
     <content url="file://$MODULE_DIR$/../../services/DeckService" dumb="true">
       <excludeFolder url="file://$MODULE_DIR$/../../services/DeckService/.idea" />
+      <excludeFolder url="file://$MODULE_DIR$/../../services/DeckService/bin" />
     </content>
   </component>
 </module>

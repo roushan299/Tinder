@@ -3,6 +3,7 @@ package com.tinder.deckservice.config;
 import com.tinder.deckservice.dto.UserDTO;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.annotation.EnableKafka;
@@ -17,6 +18,9 @@ import java.util.Map;
 @Configuration
 public class KafkaConsumerConfig {
 
+    @Value("${spring.kafka.bootstrap-servers}")
+    private String KAFKA_URL;
+
     @Bean
     public ConsumerFactory<String, UserDTO> consumerFactory() {
         JsonDeserializer<UserDTO> deserializer = new JsonDeserializer<>(UserDTO.class);
@@ -26,7 +30,7 @@ public class KafkaConsumerConfig {
 
         return new DefaultKafkaConsumerFactory<>(
                 Map.of(
-                        ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "kafka:29092",
+                        ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, KAFKA_URL,
                         ConsumerConfig.GROUP_ID_CONFIG, "user-consumer-group",
                         ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class,
                         ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class,

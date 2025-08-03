@@ -3,6 +3,7 @@ package com.tinder.tinderservice.config;
 import com.tinder.tinderservice.dto.UserDTO;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.core.ProducerFactory;
@@ -15,11 +16,14 @@ import java.util.Map;
 @Configuration
 public class KafkaProducerConfig {
 
+    @Value("${spring.kafka.bootstrap-servers}")
+    private String KAFKA_URL;
+
     @Bean
     public ProducerFactory<String, UserDTO> producerFactory() {
         return new DefaultKafkaProducerFactory<>(
                 Map.of(
-                        ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "kafka:29092",
+                        ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, KAFKA_URL,
                         ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class,
                         ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class,
                         JsonSerializer.ADD_TYPE_INFO_HEADERS, false
