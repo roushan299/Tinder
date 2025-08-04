@@ -16,6 +16,7 @@ public class UserMapper {
                 .job(userDTO.getJob())
                 .bio(userDTO.getBio())
                 .address(address)
+                .uuid(userDTO.getUuid())
                 .build();
         return user;
     }

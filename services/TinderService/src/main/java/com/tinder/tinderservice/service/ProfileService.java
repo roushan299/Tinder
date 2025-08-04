@@ -17,6 +17,8 @@ import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.UUID;
+
 @Service
 @Slf4j
 public class ProfileService implements IProfileService {
@@ -105,6 +107,11 @@ public class ProfileService implements IProfileService {
         address.setGeoLocation(geoLocation);
         log.debug("Persisting address: {}", address);
         addressService.save(address);
+
+        if(userProfile.getUuid() == null) {
+            UUID uuid = UUID.randomUUID();
+            userProfile.setUuid(uuid.toString());
+        }
 
         userProfile.setAddress(address);
         log.debug("Persisting user: {}", userProfile);

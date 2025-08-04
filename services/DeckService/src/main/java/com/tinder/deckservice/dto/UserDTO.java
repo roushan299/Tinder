@@ -19,5 +19,5 @@ public class UserDTO {
     private String job;
     private String bio;
     private AddressResponse address;
-
+    private String uuid;
 }

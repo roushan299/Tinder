@@ -20,5 +20,6 @@ public class UserDTO implements Serializable {
     private String job;
     private String bio;
     private AddressResponse address;
+    private String uuid;
 
 }

@@ -138,6 +138,7 @@ public class ProfileMapper {
                 .job(user.getJob())
                 .bio(user.getBio())
                 .address(addressResponse)
+                .uuid(user.getUuid())
                 .build();
         return userDTO;
     }
