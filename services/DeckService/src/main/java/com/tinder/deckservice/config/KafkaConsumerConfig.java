@@ -1,5 +1,6 @@
 package com.tinder.deckservice.config;
 
+import com.tinder.deckservice.dto.SwipeMatchDTO;
 import com.tinder.deckservice.dto.UserDTO;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -22,7 +23,7 @@ public class KafkaConsumerConfig {
     private String KAFKA_URL;
 
     @Bean
-    public ConsumerFactory<String, UserDTO> consumerFactory() {
+    public ConsumerFactory<String, UserDTO> userConsumerFactory() {
         JsonDeserializer<UserDTO> deserializer = new JsonDeserializer<>(UserDTO.class);
         deserializer.setRemoveTypeHeaders(true);
         deserializer.addTrustedPackages("*");
@@ -42,10 +43,41 @@ public class KafkaConsumerConfig {
     }
 
     @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, UserDTO> kafkaListenerContainerFactory() {
+    public ConcurrentKafkaListenerContainerFactory<String, UserDTO> userKafkaListenerContainerFactory() {
         ConcurrentKafkaListenerContainerFactory<String, UserDTO> factory =
                 new ConcurrentKafkaListenerContainerFactory<>();
-        factory.setConsumerFactory(consumerFactory());
+        factory.setConsumerFactory(userConsumerFactory());
         return factory;
     }
+
+    // ------------------ SwipeMatchDTO Config ------------------
+
+    @Bean
+    public ConsumerFactory<String, SwipeMatchDTO> swipeMatchConsumerFactory() {
+        JsonDeserializer<SwipeMatchDTO> deserializer = new JsonDeserializer<>(SwipeMatchDTO.class);
+        deserializer.setRemoveTypeHeaders(true);
+        deserializer.addTrustedPackages("*");
+        deserializer.setUseTypeMapperForKey(false);
+
+        return new DefaultKafkaConsumerFactory<>(
+                Map.of(
+                        ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, KAFKA_URL,
+                        ConsumerConfig.GROUP_ID_CONFIG, "swipe-match-consumer-group",
+                        ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class,
+                        ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class,
+                        ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest"
+                ),
+                new StringDeserializer(),
+                deserializer
+        );
+    }
+
+    @Bean
+    public ConcurrentKafkaListenerContainerFactory<String, SwipeMatchDTO> swipeMatchKafkaListenerContainerFactory() {
+        ConcurrentKafkaListenerContainerFactory<String, SwipeMatchDTO> factory =
+                new ConcurrentKafkaListenerContainerFactory<>();
+        factory.setConsumerFactory(swipeMatchConsumerFactory());
+        return factory;
+    }
+
 }

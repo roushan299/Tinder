@@ -7,12 +7,15 @@ import com.tinder.deckservice.dto.UserDTO;
 import com.tinder.deckservice.entity.Address;
 import com.tinder.deckservice.entity.Geolocation;
 import com.tinder.deckservice.entity.User;
+import com.tinder.deckservice.exception.ProfileDoesntExits;
 import com.tinder.deckservice.mapper.DeckUserMapper;
 import com.tinder.deckservice.mapper.UserMapper;
 import com.tinder.deckservice.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -59,6 +62,23 @@ public class UserService implements IUserService {
         User user =  this.userRepository.findById(potentialMatch).get();
         DeckUserDTO dto = DeckUserMapper.getDeckUserDTO(user);
         return dto;
+    }
+
+    @Override
+    public User getUserByUUID(String userUUID) {
+        log.info("Fetching user with UUID: {}", userUUID);
+
+        Optional<User> optionalUser = userRepository.findByUuid(userUUID);
+
+        if (optionalUser.isEmpty()) {
+            log.warn("No user found with UUID: {}. Attempting to fetch from Tinder service.", userUUID);
+            // TODO: try to fetch from Tinder service and save,
+            // if not found there, delete it from both databases
+            throw new ProfileDoesntExits("User doesn't exist with UUID: " + userUUID);
+        }
+
+        log.info("User with UUID: {} found successfully.", userUUID);
+        return optionalUser.get();
     }
 
     private Address persistAddress(UserDTO userDTO) {

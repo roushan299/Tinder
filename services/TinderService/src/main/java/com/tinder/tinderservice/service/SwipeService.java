@@ -1,12 +1,15 @@
 package com.tinder.tinderservice.service;
 
+import com.tinder.tinderservice.dto.SwipeMatchDTO;
 import com.tinder.tinderservice.dto.SwipeRequest;
 import com.tinder.tinderservice.dto.SwipeResponse;
 import com.tinder.tinderservice.entity.Swipe;
+import com.tinder.tinderservice.entity.User;
 import com.tinder.tinderservice.enums.SWIPE_TYPE;
 import com.tinder.tinderservice.exception.NoSwipeExits;
 import com.tinder.tinderservice.exception.ProfileDoesntExits;
 import com.tinder.tinderservice.mapper.SwipeMapper;
+import com.tinder.tinderservice.messageservice.SwipeMatchKafkaProducer;
 import com.tinder.tinderservice.repository.SwipeRepository;
 import com.tinder.tinderservice.util.ProfileUtil;
 import jakarta.transaction.Transactional;
@@ -22,11 +25,13 @@ public class SwipeService implements ISwipeService {
     private final SwipeRepository swipeRepository;
     private final IMatchService matchService;
     private final ProfileUtil profileUtil;
+    private final SwipeMatchKafkaProducer swipeMatchKafkaProducer;
 
-    public SwipeService(SwipeRepository swipeRepository, IMatchService matchService, @Lazy ProfileUtil profileUtil) {
+    public SwipeService(SwipeRepository swipeRepository, IMatchService matchService, @Lazy ProfileUtil profileUtil, SwipeMatchKafkaProducer swipeMatchKafkaProducer) {
         this.swipeRepository = swipeRepository;
         this.matchService = matchService;
         this.profileUtil = profileUtil;
+        this.swipeMatchKafkaProducer = swipeMatchKafkaProducer;
     }
 
     @Override
@@ -36,20 +41,31 @@ public class SwipeService implements ISwipeService {
 
         log.info("Processing swipe from user {} to user {}", userId, swipeeId);
 
-        validateProfilesExist(userId, swipeeId);
+        List<String> uuidList = validateProfilesExist(userId, swipeeId);
 
         // Convert request to entity
         Swipe swipe = SwipeMapper.getSwipeEntity(userId, swipeRequest);
 
         // Check for mutual interest and create match if necessary
+        boolean isMatch = false;
         if (isPositiveSwipe(swipeType) && hasUserSwipedBack(swipeeId, userId)) {
             matchService.createMatch(userId, swipeeId);
+            isMatch = true;
             log.info("Match created between {} and {}", userId, swipeeId);
         }
 
         // Save the swipe
         Swipe savedSwipe = swipeRepository.save(swipe);
         log.info("Swipe saved successfully with ID: {}", savedSwipe.getId());
+
+        //send data to deck service using kafka
+        SwipeMatchDTO swipeMatchDTO = SwipeMatchDTO.builder()
+                .userUUID(uuidList.get(0))
+                .swipeeUUID(uuidList.get(1))
+                .swipeType(swipeType)
+                .isMatched(isMatch)
+                .build();
+        this.swipeMatchKafkaProducer.sendSwipeMatch(swipeMatchDTO);
     }
 
     @Override
@@ -94,16 +110,19 @@ public class SwipeService implements ISwipeService {
 
 
 
-    private void validateProfilesExist(Long userId, Long swipeeId) {
-        validateProfileExists(userId);
-        validateProfileExists(swipeeId);
+    private List<String> validateProfilesExist(Long userId, Long swipeeId) throws Exception {
+        String uuid1 = validateProfileExists(userId);
+        String uuid2 = validateProfileExists(swipeeId);
+        return List.of(uuid1, uuid2);
     }
 
-    private void validateProfileExists(Long userId) {
+    private String validateProfileExists(Long userId) throws Exception {
         if (!profileUtil.isProfileExistsById(userId)) {
             log.error("User profile not found with ID: {}", userId);
             throw new ProfileDoesntExits("User profile not found with ID: " + userId);
         }
+        User user = profileUtil.getUserById(userId);
+        return user.getUuid();
     }
 
     private boolean isPositiveSwipe(SWIPE_TYPE swipeType) {

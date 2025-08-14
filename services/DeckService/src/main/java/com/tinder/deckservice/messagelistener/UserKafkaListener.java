@@ -20,12 +20,12 @@ public class UserKafkaListener {
     @KafkaListener(
             topics = "${app.kafka.topic.user-created}",
             groupId = "user-consumer-group",
-            containerFactory = "kafkaListenerContainerFactory"
+            containerFactory = "userKafkaListenerContainerFactory"
     )
     public void listenUserCreated(UserDTO userDTO) {
         logger.info("📥 Received UserDTO from Kafka: {}", userDTO);
 
-        // TODO: Process userDTO (e.g., save to DB, send notification, etc.)
+        //Process userDTO (e.g., save to DB, send notification, etc.)
         userService.saveUser(userDTO);
 
     }

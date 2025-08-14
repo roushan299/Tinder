@@ -1,5 +1,6 @@
 package com.tinder.tinderservice.config;
 
+import com.tinder.tinderservice.dto.SwipeMatchDTO;
 import com.tinder.tinderservice.dto.UserDTO;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
@@ -32,7 +33,23 @@ public class KafkaProducerConfig {
     }
 
     @Bean
+    public ProducerFactory<String, SwipeMatchDTO> producerFactorySwipeMatch() {
+        return new DefaultKafkaProducerFactory<>(
+                Map.of(
+                        ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, KAFKA_URL,
+                        ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class,
+                        ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class,
+                        JsonSerializer.ADD_TYPE_INFO_HEADERS, false
+                )
+        );
+    }
+
+    @Bean
     public KafkaTemplate<String, UserDTO> kafkaTemplate() {
         return new KafkaTemplate<>(producerFactory());
+    }
+
+    @Bean KafkaTemplate<String, SwipeMatchDTO> kafkaTemplate2() {
+        return  new KafkaTemplate<>(producerFactorySwipeMatch());
     }
 }
