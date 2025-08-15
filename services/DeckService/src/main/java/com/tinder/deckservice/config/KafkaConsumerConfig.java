@@ -2,6 +2,7 @@ package com.tinder.deckservice.config;
 
 import com.tinder.deckservice.dto.SwipeMatchDTO;
 import com.tinder.deckservice.dto.UserDTO;
+import com.tinder.deckservice.dto.UserDeleteDTO;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.beans.factory.annotation.Value;
@@ -77,6 +78,36 @@ public class KafkaConsumerConfig {
         ConcurrentKafkaListenerContainerFactory<String, SwipeMatchDTO> factory =
                 new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(swipeMatchConsumerFactory());
+        return factory;
+    }
+
+    // ------------------ UserDeleteDTO Config ------------------
+
+    @Bean
+    public ConsumerFactory<String, UserDeleteDTO> userDeleteConsumerFactory() {
+        JsonDeserializer<UserDeleteDTO> deserializer = new JsonDeserializer<>(UserDeleteDTO.class);
+        deserializer.setRemoveTypeHeaders(true);
+        deserializer.addTrustedPackages("*");
+        deserializer.setUseTypeMapperForKey(false);
+
+        return new DefaultKafkaConsumerFactory<>(
+                Map.of(
+                        ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, KAFKA_URL,
+                        ConsumerConfig.GROUP_ID_CONFIG, "user-delete-consumer-group",
+                        ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class,
+                        ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class,
+                        ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest"
+                ),
+                new StringDeserializer(),
+                deserializer
+        );
+    }
+
+    @Bean
+    public ConcurrentKafkaListenerContainerFactory<String, UserDeleteDTO> userDeleteKafkaListenerContainerFactory() {
+        ConcurrentKafkaListenerContainerFactory<String, UserDeleteDTO> factory =
+                new ConcurrentKafkaListenerContainerFactory<>();
+        factory.setConsumerFactory(userDeleteConsumerFactory());
         return factory;
     }
 

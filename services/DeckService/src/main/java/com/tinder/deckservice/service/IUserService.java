@@ -12,4 +12,6 @@ public interface IUserService {
     DeckUserDTO getUserById(long potentialMatch);
 
     User getUserByUUID(String userUUID);
+
+    void deleteUserById(long id);
 }

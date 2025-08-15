@@ -4,6 +4,7 @@ import com.tinder.deckservice.entity.Match;
 import com.tinder.deckservice.repository.MatchRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -26,6 +27,19 @@ public class MatchService implements IMatchService{
 
         matchRepository.save(match);
         log.info("Match saved successfully: {}", match);
+    }
+
+    @Override
+    public List<Match> getAllMatchByUserId(long userId) {
+        log.debug("Fetching matches for user ID: {}", userId);
+        return matchRepository.findByUserOneIdOrUserTwoId(userId, userId);
+    }
+
+
+    @Override
+    public void deleteMatches(List<Match> matches) {
+        matchRepository.deleteAll(matches);
+        log.info("Deleted {} matches", matches.size());
     }
 
 }

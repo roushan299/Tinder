@@ -1,9 +1,6 @@
 package com.tinder.tinderservice.service;
 
-import com.tinder.tinderservice.dto.CreateProfileRequest;
-import com.tinder.tinderservice.dto.ProfileResponse;
-import com.tinder.tinderservice.dto.UpdateProfileRequest;
-import com.tinder.tinderservice.dto.UserDTO;
+import com.tinder.tinderservice.dto.*;
 import com.tinder.tinderservice.entity.Address;
 import com.tinder.tinderservice.entity.Geolocation;
 import com.tinder.tinderservice.entity.User;
@@ -11,12 +8,12 @@ import com.tinder.tinderservice.exception.MatchCleanupException;
 import com.tinder.tinderservice.exception.ProfileDoesntExits;
 import com.tinder.tinderservice.exception.SwipeDeletionException;
 import com.tinder.tinderservice.mapper.ProfileMapper;
+import com.tinder.tinderservice.messageservice.UserDeleteKafkaProducer;
 import com.tinder.tinderservice.messageservice.UserKafkaProducer;
 import com.tinder.tinderservice.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-
 import java.util.UUID;
 
 @Service
@@ -29,14 +26,16 @@ public class ProfileService implements IProfileService {
     private final ISwipeService swipeService;
     private final IMatchService matchService;
     private final UserKafkaProducer userKafkaProducer;
+    private final UserDeleteKafkaProducer userDeleteKafkaProducer;
 
-    public ProfileService(UserRepository userRepository, IAddressService addressService, IGeolocationService geolocationService, ISwipeService swipeService, IMatchService matchService, UserKafkaProducer userKafkaProducer) {
+    public ProfileService(UserRepository userRepository, IAddressService addressService, IGeolocationService geolocationService, ISwipeService swipeService, IMatchService matchService, UserKafkaProducer userKafkaProducer, UserDeleteKafkaProducer userDeleteKafkaProducer) {
         this.userRepository = userRepository;
         this.addressService = addressService;
         this.geolocationService = geolocationService;
         this.swipeService = swipeService;
         this.matchService = matchService;
         this.userKafkaProducer = userKafkaProducer;
+        this.userDeleteKafkaProducer = userDeleteKafkaProducer;
     }
 
     @Override
@@ -60,14 +59,16 @@ public class ProfileService implements IProfileService {
 
     @Override
     @Transactional
-    public void deleteProfile(Long id) {
+    public void deleteProfile(Long id) throws Exception {
         log.info("Initiating profile deletion for ID: {}", id);
 
         if (!userRepository.existsById(id)) {
             log.warn("Profile not found for deletion: ID {}", id);
             throw new ProfileDoesntExits("Profile doesn't exist with id: " + id);
         }
-
+        User user = this.getUserById(id);
+        UserDeleteDTO userDeleteDTO = UserDeleteDTO.builder().uuid(user.getUuid()).build();
+        userDeleteKafkaProducer.deleteUser(userDeleteDTO);
         deleteUser(id);
         deleteUserSwipes(id);
         deleteUserMatches(id);

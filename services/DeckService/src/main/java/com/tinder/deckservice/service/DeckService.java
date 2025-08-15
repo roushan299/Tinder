@@ -55,6 +55,18 @@ public class DeckService implements IDeckService {
         return deckResponse;
     }
 
+    @Override
+    public List<Deck> getAllDeckByUserId(long id) {
+        logger.debug("Fetching decks for user ID: {}", id);
+        return deckRepository.findByUserIdOrPotentialMatch(id, id);
+    }
+
+    @Override
+    public void deleteDecks(List<Deck> deckList) {
+        deckRepository.deleteAll(deckList);
+        logger.info("Deleted {} decks", deckList.size());
+    }
+
     private List<Deck> generateDeckForUser(Long userId) {
         logger.info("Generating deck for userId: {}", userId);
         // TODO: Implement logic to generate deck

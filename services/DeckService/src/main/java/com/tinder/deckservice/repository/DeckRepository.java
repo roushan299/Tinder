@@ -10,4 +10,5 @@ import java.util.List;
 public interface DeckRepository extends JpaRepository<Deck,Long> {
 
     List<Deck> findByUserId(Long userId);
+    List<Deck> findByUserIdOrPotentialMatch(long userId, long potentialMatch);
 }

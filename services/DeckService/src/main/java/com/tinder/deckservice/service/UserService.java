@@ -81,6 +81,11 @@ public class UserService implements IUserService {
         return optionalUser.get();
     }
 
+    @Override
+    public void deleteUserById(long id) {
+        userRepository.deleteById(id);
+    }
+
     private Address persistAddress(UserDTO userDTO) {
         AddressResponse addressResponse = userDTO.getAddress();
         if (addressResponse == null) {

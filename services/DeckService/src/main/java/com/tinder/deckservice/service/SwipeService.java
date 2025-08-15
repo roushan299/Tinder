@@ -6,6 +6,7 @@ import com.tinder.deckservice.entity.User;
 import com.tinder.deckservice.repository.SwipeRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -56,6 +57,18 @@ public class SwipeService implements ISwipeService{
         }
 
         log.info("Swipe/match creation completed for swiperId={} and swipeeId={}", user.getId(), swipee.getId());
+    }
+
+    @Override
+    public List<Swipe> getAllSwipeByUserId(long id) {
+        log.debug("Fetching swipes for user ID: {}", id);
+        return swipeRepository.findBySwiperIdOrSwipeeId(id, id);
+    }
+
+    @Override
+    public void deleteSwipes(List<Swipe> swipeList) {
+        swipeRepository.deleteAll(swipeList);
+        log.info("Deleted {} swipes", swipeList.size());
     }
 
 }
