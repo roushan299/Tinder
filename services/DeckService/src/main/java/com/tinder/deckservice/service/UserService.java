@@ -14,7 +14,7 @@ import com.tinder.deckservice.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -84,6 +84,21 @@ public class UserService implements IUserService {
     @Override
     public void deleteUserById(long id) {
         userRepository.deleteById(id);
+    }
+
+    @Override
+    public User findUserById(Long userId) {
+       Optional<User> optionalUser =  this.userRepository.findById(userId);
+       if(optionalUser.isEmpty()){
+           throw new ProfileDoesntExits("User doesn't exist with ID: " + userId);
+       }
+        return optionalUser.get();
+    }
+
+    @Override
+    public List<User> findUsersWithinRadius(double lat, double lon, double radiusKm) {
+        List<User> userList = userRepository.findUsersWithinRadius(lat, lon, radiusKm);
+        return userList;
     }
 
     private Address persistAddress(UserDTO userDTO) {

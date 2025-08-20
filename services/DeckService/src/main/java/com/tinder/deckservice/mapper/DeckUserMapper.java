@@ -9,6 +9,7 @@ public class DeckUserMapper {
 
     public static DeckUserDTO getDeckUserDTO(User user) {
         DeckUserDTO deckUserDTO = DeckUserDTO.builder()
+                .id(user.getId())
                 .name(user.getName())
                 .age(user.getAge())
                 .gender(user.getGender())

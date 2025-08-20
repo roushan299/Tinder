@@ -11,4 +11,5 @@ public interface SwipeRepository extends JpaRepository<Swipe, Long> {
 
     List<Swipe> findBySwiperIdOrSwipeeId(long swiperId, long swipeeId);
 
+    List<Swipe> findBySwiperId(long userId);
 }

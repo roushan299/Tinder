@@ -16,7 +16,9 @@ public class User extends BaseEntity {
 
     private String name;
     private Integer age;
+    @Enumerated(EnumType.STRING)
     private GENDER gender;
+    @Enumerated(EnumType.STRING)
     private GENDER sexualPreference;
     private String job;
     private String bio;

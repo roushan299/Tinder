@@ -12,4 +12,6 @@ public interface ISwipeService {
     List<Swipe> getAllSwipeByUserId(long id);
 
     void deleteSwipes(List<Swipe> swipeList);
+
+    List<Swipe> getAllThatISwiped(long userId);
 }

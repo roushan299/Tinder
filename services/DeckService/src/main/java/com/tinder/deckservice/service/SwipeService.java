@@ -71,4 +71,19 @@ public class SwipeService implements ISwipeService{
         log.info("Deleted {} swipes", swipeList.size());
     }
 
+    @Override
+    public List<Swipe> getAllThatISwiped(long userId) {
+        log.debug("Fetching swipes made by userId: {}", userId);
+
+        List<Swipe> swipes = swipeRepository.findBySwiperId(userId);
+
+        if (swipes == null || swipes.isEmpty()) {
+            log.info("No swipes found for userId: {}", userId);
+            return List.of(); // return empty list instead of null
+        }
+
+        log.debug("Found {} swipes for userId: {}", swipes.size(), userId);
+        return swipes;
+    }
+
 }
