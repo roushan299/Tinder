@@ -5,15 +5,18 @@ import com.tinder.tinderservice.entity.Address;
 import com.tinder.tinderservice.entity.Geolocation;
 import com.tinder.tinderservice.entity.User;
 import com.tinder.tinderservice.exception.MatchCleanupException;
+import com.tinder.tinderservice.exception.MaxImageUploadException;
 import com.tinder.tinderservice.exception.ProfileDoesntExits;
 import com.tinder.tinderservice.exception.SwipeDeletionException;
 import com.tinder.tinderservice.mapper.ProfileMapper;
 import com.tinder.tinderservice.messageservice.UserDeleteKafkaProducer;
 import com.tinder.tinderservice.messageservice.UserKafkaProducer;
 import com.tinder.tinderservice.repository.UserRepository;
+import com.tinder.tinderservice.util.S3StorageService;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import java.util.UUID;
 
 @Service
@@ -27,8 +30,10 @@ public class ProfileService implements IProfileService {
     private final IMatchService matchService;
     private final UserKafkaProducer userKafkaProducer;
     private final UserDeleteKafkaProducer userDeleteKafkaProducer;
+    private final S3StorageService s3StorageService;
+    private final IUserImageService userImageService;
 
-    public ProfileService(UserRepository userRepository, IAddressService addressService, IGeolocationService geolocationService, ISwipeService swipeService, IMatchService matchService, UserKafkaProducer userKafkaProducer, UserDeleteKafkaProducer userDeleteKafkaProducer) {
+    public ProfileService(UserRepository userRepository, IAddressService addressService, IGeolocationService geolocationService, ISwipeService swipeService, IMatchService matchService, UserKafkaProducer userKafkaProducer, UserDeleteKafkaProducer userDeleteKafkaProducer,  S3StorageService s3StorageService, IUserImageService userImageService) {
         this.userRepository = userRepository;
         this.addressService = addressService;
         this.geolocationService = geolocationService;
@@ -36,6 +41,8 @@ public class ProfileService implements IProfileService {
         this.matchService = matchService;
         this.userKafkaProducer = userKafkaProducer;
         this.userDeleteKafkaProducer = userDeleteKafkaProducer;
+        this.s3StorageService = s3StorageService;
+        this.userImageService = userImageService;
     }
 
     @Override
@@ -150,6 +157,30 @@ public class ProfileService implements IProfileService {
             log.error("Failed to delete matches for user ID: {} - {}", id, e.getMessage());
             throw new MatchCleanupException("Failed to delete matches for user ID: " + id);
         }
+    }
+
+    @Override
+    public String uploadImage(Long id, MultipartFile file) throws Exception {
+        int maxImageCount = 5;
+
+        log.info("Starting image upload for userId={}, fileName={}", id, file.getOriginalFilename());
+
+        User user = this.getUserById(id);
+        log.debug("Fetched user details: userId={}, userUuid={}", user.getId(), user.getUuid());
+
+        int imageCount = userImageService.countByUserId(id);
+        log.info("Current image count for userId={} is {}", id, imageCount);
+
+        if (imageCount >= maxImageCount) {
+            log.warn("Image upload rejected for userId={} - already has {} images (limit={})",
+                    id, imageCount, maxImageCount);
+            throw new MaxImageUploadException("A user can upload a maximum of " + maxImageCount + " images.");
+        }
+
+        String filePath = s3StorageService.uploadUserImage(id, user.getUuid(), file);
+        log.info("Image uploaded successfully for userId={}, fileUrl={}", id, filePath);
+
+        return filePath;
     }
 
 }

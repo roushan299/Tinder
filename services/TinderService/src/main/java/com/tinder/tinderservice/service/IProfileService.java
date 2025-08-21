@@ -4,6 +4,7 @@ import com.tinder.tinderservice.dto.CreateProfileRequest;
 import com.tinder.tinderservice.dto.ProfileResponse;
 import com.tinder.tinderservice.dto.UpdateProfileRequest;
 import com.tinder.tinderservice.entity.User;
+import org.springframework.web.multipart.MultipartFile;
 
 public interface IProfileService {
     
@@ -18,4 +19,6 @@ public interface IProfileService {
     boolean isProfileExistsById(Long id);
 
     User getUserById(Long id) throws Exception;
+
+    String uploadImage(Long id, MultipartFile file) throws Exception;
 }

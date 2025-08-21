@@ -60,6 +60,15 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * Handle when user have already uploaded 5 images in s3
+     */
+
+    @ExceptionHandler(MaxImageUploadException.class)
+    public ResponseEntity<ErrorResponse> handleMaxImageUpload(MaxImageUploadException ex) {
+        return buildErrorResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+
+    /**
      * Handle all other unexpected exceptions (fallback)
      */
     @ExceptionHandler(Exception.class)
