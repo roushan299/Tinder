@@ -15,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import java.net.URL;
 
 @RestController
 @RequestMapping("/api/v1/profile")
@@ -101,18 +102,15 @@ public class ProfileController {
             description = "Uploads a profile image for the given user ID, stores it in S3, and saves the image URL in the database"
     )
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Image uploaded successfully",
-                    content = @Content(schema = @Schema(implementation = String.class))),
-            @ApiResponse(responseCode = "400", description = "Invalid user ID or file format",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "404", description = "User not found",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "500", description = "Internal server error",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            @ApiResponse(responseCode = "200", description = "Image uploaded successfully", content = @Content(schema = @Schema(implementation = String.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid user ID or file format", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = "User not found", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    public ResponseEntity<String> uploadImage(@PathVariable("id") Long id, @RequestParam("file") MultipartFile file) throws Exception {
+    public ResponseEntity<URL> uploadImage(@PathVariable("id") Long id, @RequestParam("file") MultipartFile file) throws Exception {
         String imageUrl = this.profileService.uploadImage(id, file);
-        return ResponseEntity.ok(imageUrl);
+        URL url = new URL(imageUrl);
+        return ResponseEntity.ok(url);
     }
 
 

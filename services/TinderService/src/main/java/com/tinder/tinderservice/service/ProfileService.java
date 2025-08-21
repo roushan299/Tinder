@@ -177,9 +177,12 @@ public class ProfileService implements IProfileService {
             throw new MaxImageUploadException("A user can upload a maximum of " + maxImageCount + " images.");
         }
 
-        String filePath = s3StorageService.uploadUserImage(id, user.getUuid(), file);
+        String filePath = s3StorageService.uploadUserImage(user.getUuid(), file);
         log.info("Image uploaded successfully for userId={}, fileUrl={}", id, filePath);
 
+        log.info("Saving uploaded image URL to database for userId={}, fileUrl={}", id, filePath);
+        userImageService.saveImageUrl(id, filePath);
+        log.info("Image URL saved successfully for userId={}", id);
         return filePath;
     }
 
