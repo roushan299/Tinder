@@ -3,6 +3,7 @@ package com.tinder.tinderservice.controller;
 import com.tinder.tinderservice.dto.CreateProfileRequest;
 import com.tinder.tinderservice.dto.ProfileResponse;
 import com.tinder.tinderservice.dto.UpdateProfileRequest;
+import com.tinder.tinderservice.dto.UserImageURLResponse;
 import com.tinder.tinderservice.exception.ErrorResponse;
 import com.tinder.tinderservice.service.IProfileService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -10,6 +11,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +21,7 @@ import java.net.URL;
 
 @RestController
 @RequestMapping("/api/v1/profile")
+@Tag(name = "Profile API", description = "Operations related to user profile")
 public class ProfileController {
 
     private final IProfileService profileService;
@@ -113,5 +116,37 @@ public class ProfileController {
         return ResponseEntity.ok(url);
     }
 
+
+    @DeleteMapping("/image/{id}")
+    @Operation(
+            summary = "Delete user profile image",
+            description = "Deletes a profile image for the given user ID. Removes both the image record from the database and the actual file from S3."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Image deleted successfully", content = @Content(schema = @Schema(implementation = String.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid user ID or file name", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = "User or image not found", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    public ResponseEntity<String> deleteImage(@PathVariable("id") Long id, @RequestParam String fileName) throws Exception {
+        profileService.deleteImage(id, fileName);
+        return new ResponseEntity<>("Successfully deleted image of profile: " + id, HttpStatus.OK);
+    }
+
+    @GetMapping("/image/{id}")
+    @Operation(
+            summary = "Get user images",
+            description = "Fetches all profile images associated with the given user ID from the database."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Images retrieved successfully", content = @Content(schema = @Schema(implementation = UserImageURLResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid user ID or file name", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = "User not found or no images exist", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    public ResponseEntity<UserImageURLResponse> getUserImages(@PathVariable("id") Long id) throws Exception {
+       UserImageURLResponse userImageURLResponse = this.profileService.getAllUserImages(id);
+       return ResponseEntity.ok(userImageURLResponse);
+    }
 
 }

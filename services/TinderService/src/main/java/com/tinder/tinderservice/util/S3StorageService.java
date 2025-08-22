@@ -1,13 +1,15 @@
 package com.tinder.tinderservice.util;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
-
 import java.io.IOException;
 
+@Slf4j
 @Service
 public class S3StorageService {
 
@@ -38,6 +40,17 @@ public class S3StorageService {
         //Generate file URL
         String fileUrl = "https://"+bucketName+".s3.amazonaws.com/"+key;
         return  fileUrl;
+    }
+
+    public void deleteImage(String uuid, String fileName)throws IOException{
+        String key = uuid+"/"+fileName;
+        log.info("Deleting image from S3: bucket={}, key={}", bucketName, key);
+        DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
+                .bucket(bucketName)
+                .key(key)
+                .build();
+        s3Client.deleteObject(deleteObjectRequest);
+        log.info("Image deleted successfully: key={}", key);
     }
 
 }

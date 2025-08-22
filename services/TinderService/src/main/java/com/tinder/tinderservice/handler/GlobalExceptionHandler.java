@@ -37,7 +37,7 @@ public class GlobalExceptionHandler {
      * Handle when deleting match failed
      */
     @ExceptionHandler(MatchCleanupException.class)
-    public ResponseEntity<ErrorResponse> handleIllegalArgumentException(SwipeDeletionException ex) {
+    public ResponseEntity<ErrorResponse> handleIllegalArgumentException(MatchCleanupException ex) {
         return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage());
     }
 
@@ -46,7 +46,7 @@ public class GlobalExceptionHandler {
      */
 
     @ExceptionHandler(SwipeDeletionException.class)
-    public ResponseEntity<ErrorResponse> handleIllegalArgumentException(MatchCleanupException ex) {
+    public ResponseEntity<ErrorResponse> handleIllegalArgumentException(SwipeDeletionException ex) {
         return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage());
     }
 
@@ -56,7 +56,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ErrorResponse> handleIllegalArgumentException(IllegalArgumentException ex) {
-        return buildErrorResponse(HttpStatus.NOT_FOUND, ex.getMessage());
+        return buildErrorResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 
     /**
@@ -65,6 +65,15 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MaxImageUploadException.class)
     public ResponseEntity<ErrorResponse> handleMaxImageUpload(MaxImageUploadException ex) {
+        return buildErrorResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+
+    /**
+     * Handle when no image exits for user
+     */
+
+    @ExceptionHandler(NoImageExits.class)
+    public ResponseEntity<ErrorResponse> handleNoImageExits(NoImageExits ex) {
         return buildErrorResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 

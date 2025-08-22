@@ -4,19 +4,20 @@ import com.tinder.tinderservice.dto.*;
 import com.tinder.tinderservice.entity.Address;
 import com.tinder.tinderservice.entity.Geolocation;
 import com.tinder.tinderservice.entity.User;
-import com.tinder.tinderservice.exception.MatchCleanupException;
-import com.tinder.tinderservice.exception.MaxImageUploadException;
-import com.tinder.tinderservice.exception.ProfileDoesntExits;
-import com.tinder.tinderservice.exception.SwipeDeletionException;
+import com.tinder.tinderservice.entity.UserImage;
+import com.tinder.tinderservice.exception.*;
 import com.tinder.tinderservice.mapper.ProfileMapper;
+import com.tinder.tinderservice.mapper.UserImageMapper;
 import com.tinder.tinderservice.messageservice.UserDeleteKafkaProducer;
 import com.tinder.tinderservice.messageservice.UserKafkaProducer;
 import com.tinder.tinderservice.repository.UserRepository;
 import com.tinder.tinderservice.util.S3StorageService;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -32,6 +33,9 @@ public class ProfileService implements IProfileService {
     private final UserDeleteKafkaProducer userDeleteKafkaProducer;
     private final S3StorageService s3StorageService;
     private final IUserImageService userImageService;
+
+    @Value("${S3_BUCKET_NAME}")
+    private String bucketName;
 
     public ProfileService(UserRepository userRepository, IAddressService addressService, IGeolocationService geolocationService, ISwipeService swipeService, IMatchService matchService, UserKafkaProducer userKafkaProducer, UserDeleteKafkaProducer userDeleteKafkaProducer,  S3StorageService s3StorageService, IUserImageService userImageService) {
         this.userRepository = userRepository;
@@ -184,6 +188,51 @@ public class ProfileService implements IProfileService {
         userImageService.saveImageUrl(id, filePath);
         log.info("Image URL saved successfully for userId={}", id);
         return filePath;
+    }
+
+    @Override
+    public void deleteImage(Long id, String fileName) throws Exception {
+        User user = getUserById(id);
+        String key = user.getUuid()+"/"+fileName;
+        String fileUrl = "https://"+bucketName+".s3.amazonaws.com/"+key;
+
+        UserImage userImage = this.userImageService.findByUserIdAndFileNameLike(id, fileUrl);
+        if (userImage == null) {
+            log.warn("Attempt to delete non-existing image. userId={}, fileName={}", id, fileName);
+            throw new NoImageExits(
+                    String.format("No image exists with fileName='%s' for userId=%d", fileName, id)
+            );
+        }
+
+        // Delete from DB
+        userImageService.deleteImage(userImage);
+        log.debug("Deleted image record from DB. userId={}, fileName={}", id, fileName);
+
+        // Delete from S3
+        s3StorageService.deleteImage(user.getUuid(), fileName);
+        log.info("Image deleted successfully. userId={}, fileName={}, uuid={}", id, fileName, user.getUuid());
+    }
+
+    @Override
+    public UserImageURLResponse getAllUserImages(Long id) throws Exception {
+        log.info("Fetching all user images for userId={}", id);
+
+        boolean isUserExits = isProfileExistsById(id);
+        if (!isUserExits) {
+            log.warn("Attempt to fetch images for non-existing profile. userId={}", id);
+            throw new ProfileDoesntExits("Profile doesn't exist with id: " + id);
+        }
+
+        List<UserImage> userImageList = this.userImageService.getAllUserImages(id);
+        if (userImageList.isEmpty()) {
+            log.warn("No images found for userId={}", id);
+            throw new NoImageExits("No user images found for id: " + id);
+        }
+
+        UserImageURLResponse userImageURLResponse = UserImageMapper.getUserImageResponseDTO(userImageList);
+        log.info("Successfully fetched {} images for userId={}", userImageList.size(), id);
+
+        return userImageURLResponse;
     }
 
 }
