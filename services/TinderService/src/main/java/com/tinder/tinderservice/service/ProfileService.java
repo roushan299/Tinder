@@ -235,4 +235,51 @@ public class ProfileService implements IProfileService {
         return userImageURLResponse;
     }
 
+    @Override
+    public void updateImage(Long id, String oldFileName, MultipartFile newFile) throws Exception {
+        log.info("Starting image update request for userId={}, oldFileName={}", id, oldFileName);
+
+        // 1. Validate user
+        User user = this.getUserById(id);
+        log.debug("Validated userId={}, uuid={}", id, user.getUuid());
+
+        // 2. Locate old image in DB
+        String key = user.getUuid() + "/" + oldFileName;
+        String fileUrl = "https://" + bucketName + ".s3.amazonaws.com/" + key;
+
+        UserImage userImage = this.userImageService.findByUserIdAndFileNameLike(id, fileUrl);
+        if (userImage == null) {
+            log.warn("Image update failed: No existing image found. userId={}, oldFileName={}", id, oldFileName);
+            throw new NoImageExits(String.format("No image exists with fileName='%s' for userId=%d", oldFileName, id));
+        }
+        log.debug("Existing image located in DB for userId={}, imageUrl={}", id, userImage.getImageURL());
+
+        // 3. Delete old image from S3
+        try {
+            s3StorageService.deleteImage(user.getUuid(), oldFileName);
+            log.info("Old image deleted from S3. userId={}, oldFileName={}", id, oldFileName);
+        } catch (Exception e) {
+            log.error("Failed to delete old image from S3. userId={}, oldFileName={}, error={}", id, oldFileName, e.getMessage(), e);
+            throw e; // rethrow, don't continue if deletion failed
+        }
+
+        // 4. Upload new image to S3
+        String newImageUrl;
+        try {
+            newImageUrl = s3StorageService.uploadUserImage(user.getUuid(), newFile);
+            log.info("New image uploaded successfully to S3. userId={}, newFileName={}", id, newFile.getOriginalFilename());
+        } catch (Exception e) {
+            log.error("Failed to upload new image to S3. userId={}, newFileName={}, error={}", id, newFile.getOriginalFilename(), e.getMessage(), e);
+            throw e;
+        }
+
+        // 5. Update DB with new image URL
+        userImage.setImageURL(newImageUrl);
+        userImageService.updateUserImage(userImage);
+        log.info("Database updated with new image URL. userId={}, newImageUrl={}", id, newImageUrl);
+
+        log.info("Image update completed successfully for userId={}, replaced oldFileName={} with newFileName={}", id, oldFileName, newFile.getOriginalFilename());
+    }
+
+
 }

@@ -15,4 +15,6 @@ public interface IUserImageService {
     void deleteImage(UserImage userImage);
 
     List<UserImage> getAllUserImages(Long id);
+
+    void updateUserImage(UserImage userImage);
 }

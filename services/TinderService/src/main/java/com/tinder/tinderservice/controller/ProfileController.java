@@ -7,6 +7,7 @@ import com.tinder.tinderservice.dto.UserImageURLResponse;
 import com.tinder.tinderservice.exception.ErrorResponse;
 import com.tinder.tinderservice.service.IProfileService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -147,6 +148,31 @@ public class ProfileController {
     public ResponseEntity<UserImageURLResponse> getUserImages(@PathVariable("id") Long id) throws Exception {
        UserImageURLResponse userImageURLResponse = this.profileService.getAllUserImages(id);
        return ResponseEntity.ok(userImageURLResponse);
+    }
+
+    @PutMapping("/image/{id}")
+    @Operation(
+            summary = "Update user profile image",
+            description = "Updates a specific profile image for the given user ID. The old image will be deleted from S3 and the database, and the new image will be uploaded."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Image updated successfully", content = @Content(schema = @Schema(implementation = String.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid user ID or file format", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = "User or image not found", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    public ResponseEntity<String> updateImage(
+            @Parameter(description = "User ID for whom the image should be updated", example = "101")
+            @PathVariable("id") Long id,
+
+            @Parameter(description = "Old file name of the image to be replaced", example = "old_profile.jpg")
+            @RequestParam String oldFileName,
+
+            @Parameter(description = "New image file to upload")
+            @RequestPart("file") MultipartFile newFile
+    ) throws Exception {
+        profileService.updateImage(id, oldFileName, newFile);
+        return ResponseEntity.ok("Image updated successfully for userId=" + id);
     }
 
 }

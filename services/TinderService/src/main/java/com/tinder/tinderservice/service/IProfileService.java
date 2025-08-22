@@ -26,4 +26,6 @@ public interface IProfileService {
     void deleteImage(Long id, String fileName) throws Exception;
 
     UserImageURLResponse getAllUserImages(Long id) throws Exception;
+
+    void updateImage(Long id, String oldFileName, MultipartFile newFile) throws Exception;
 }

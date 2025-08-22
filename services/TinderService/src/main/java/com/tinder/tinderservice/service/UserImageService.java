@@ -46,4 +46,9 @@ public class UserImageService implements IUserImageService {
         return userImageList;
     }
 
+    @Override
+    public void updateUserImage(UserImage userImage) {
+        this.userImageRepository.save(userImage);
+    }
+
 }
