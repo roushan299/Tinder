@@ -1,22 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="CompilerConfiguration">
-    <annotationProcessing>
-      <profile name="Gradle Imported" enabled="true">
-        <outputRelativeToContentRoot value="true" />
-        <processorPath useClasspath="false">
-          <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.projectlombok/lombok/1.18.30/f195ee86e6c896ea47a1d39defbe20eb59cd149d/lombok-1.18.30.jar" />
-          <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.springframework.boot/spring-boot-configuration-processor/3.1.9/7313cf9b1da6fb98216ae2d8281935ea2780ef15/spring-boot-configuration-processor-3.1.9.jar" />
-        </processorPath>
-        <module name="TinderService.main" />
-      </profile>
-    </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="ServiceRegistery" target="17" />
+      <module name="ServiceRegistery.main" target="17" />
+      <module name="ServiceRegistery.test" target="17" />
+    </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="DeckService" options="-parameters" />
       <module name="DeckService.main" options="-parameters" />
       <module name="DeckService.test" options="-parameters" />
+      <module name="ServiceRegistery" options="-parameters" />
+      <module name="ServiceRegistery.main" options="-parameters" />
+      <module name="ServiceRegistery.test" options="-parameters" />
+      <module name="ServiceRegistry" options="-parameters" />
+      <module name="ServiceRegistry.main" options="-parameters" />
+      <module name="ServiceRegistry.test" options="-parameters" />
       <module name="TinderService" options="-parameters" />
       <module name="TinderService.main" options="-parameters" />
       <module name="TinderService.test" options="-parameters" />
