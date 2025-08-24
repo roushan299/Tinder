@@ -9,6 +9,9 @@
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="ApiGateway" options="-parameters" />
+      <module name="ApiGateway.main" options="-parameters" />
+      <module name="ApiGateway.test" options="-parameters" />
       <module name="DeckService" options="-parameters" />
       <module name="DeckService.main" options="-parameters" />
       <module name="DeckService.test" options="-parameters" />
